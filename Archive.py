@@ -11,6 +11,8 @@ channel = None
 parser = argparse.ArgumentParser(description='Discord channel scraper')
 
 requiredNamed = parser.add_argument_group('Required arguments:')
+requiredNamed.add_argument('-u', '--user', type=str,
+                           help='Discord user token.', required=True)
 requiredNamed.add_argument('-c', '--channel', type=str,
                            help='ID of the channel to archive. Only the last id of the url is needed.', required=True)
 requiredNamed.add_argument('-o', '--output', type=str,
@@ -84,5 +86,5 @@ async def on_ready():
         print('Archiving complete.')
 
 # ----------------------------
-userToken = "NTc4MjI4NzczMzkzMDA2NjA0.YcUwrw.pjz9tfBitAaV2BDd7VqNs_f8EHg"
+userToken = args.user
 client.run(userToken, bot=False)
