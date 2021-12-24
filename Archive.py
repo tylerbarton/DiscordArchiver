@@ -17,7 +17,7 @@ requiredNamed.add_argument('-o', '--output', type=str,
                            help='Output file where the messages will be saved. In the form of *.txt', required=True)
 
 optionalNamed = parser.add_argument_group('Optional arguments:')
-optionalNamed.add_argument('-l', '--limit', type=int,
+optionalNamed.add_argument('-l', '--limit', type=int, default=1000000,
                            help='The limit of the amount of messages to scrape. Default is unlimited.', required=False)
 
 args = parser.parse_args()
@@ -29,26 +29,22 @@ def test_connection():
     """
     if client:
         print('Connection successful.')
-        print('Logged into ID: ', client.user.id)
+        print('Logged into ID: ', client.user.name)
         print('Channel ID: ', args.channel)
 
 
-
-def load_channel(id: int):
+def load_channel(channel_id: int):
     """
     Loads and validates the channel
-    @:param id ID of the channel to load
+    @:param channel_id ID of the channel to load
     @:return True if channel was successfully loaded, else false.
     :rtype: bool
     """
-    Archive.channel = client.get_channel(id=836056676175446117)
+    Archive.channel = client.get_channel(id=int(channel_id))
     if Archive.channel is None:
         print("Error: This channel does not exist.")
         return False
-    # if Archive.channel.read_message_history:
-    #     print("Error: You do not have permission to read this channel's history")
-    #     return False
-    print('Channel Name: ', client.get_channel(id=836056676175446117))
+    print('Channel Name: ', Archive.channel)
     return True
 
 
@@ -61,7 +57,7 @@ async def scrape_channel(channel: discord.channel):
     output_dir = open(args.output, 'w')
     with tqdm(leave=True, unit=' messages') as scraped:
         message_count = 0
-        async for message in channel.history(limit=1000000000):
+        async for message in channel.history(limit=args.limit):
             # format the message
             line = "[{}] {}: {}".format(message.created_at, message.author.name, message.content)
             line = line.encode('utf-8', 'ignore')
@@ -81,13 +77,12 @@ async def on_ready():
     Called when the discord client is ready.
     Will immediately start archiving the targeted channel.
     """
-
     test_connection()
-    if load_channel(args.channel):
-        await scrape_channel(Archive.channel)
+    if load_channel(channel_id=args.channel):
+        await scrape_channel(channel=Archive.channel)
         print('-----')
         print('Archiving complete.')
 
 # ----------------------------
-userToken = "NTc4MjI4NzczMzkzMDA2NjA0.X0VP1A.tJ8x-wCYMOxI_GV203asxhVQUvc"
+userToken = "NTc4MjI4NzczMzkzMDA2NjA0.YcUwrw.pjz9tfBitAaV2BDd7VqNs_f8EHg"
 client.run(userToken, bot=False)
